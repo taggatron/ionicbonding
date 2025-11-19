@@ -22,6 +22,7 @@ function init() {
   setupDragAndDrop();
   setupReset();
   initLattice();
+  initIsoLattice();
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -61,6 +62,8 @@ function resetAll(){
   setupDragAndDrop();
   $('#latticeView').innerHTML='';
   initLattice();
+  const iso = $('#latticeIsoView'); if(iso) iso.innerHTML='';
+  initIsoLattice();
   initDotCrossPending();
 }
 
@@ -565,4 +568,39 @@ function addVerticalGhosts(node){
 function clearBondLines(){
   $('#latticeView').querySelectorAll('.bond-line').forEach(l=>l.remove());
   $('#latticeView').querySelectorAll('.ion-node.focused').forEach(n=>n.classList.remove('focused'));
+}
+
+/* ---------- Isometric Lattice Rendering (3D impression) ---------- */
+function initIsoLattice(){
+  const container = $('#latticeIsoView');
+  if(!container) return;
+  const N = 7; // edge length of cube
+  const spacing = 44; // base spacing
+  const half = spacing * 0.5;
+  const quarter = spacing * 0.25;
+  const depthRaise = spacing * 0.6; // increased vertical lift per layer for a more cubic appearance
+  const offsetX = container.clientWidth / 2; // center cube horizontally
+  const offsetY = 280; // baseline vertical position adjusted for increased depth
+
+  // Build nodes with 3D parity alternation: (x+y+z) even = Na+, odd = Cl−
+  for(let z=0; z<N; z++){
+    for(let y=0; y<N; y++){
+      for(let x=0; x<N; x++){
+        const isNa = ((x + y + z) % 2) === 0;
+        const node = document.createElement('div');
+        node.className = 'iso-node ' + (isNa ? 'na' : 'cl');
+
+        // isometric projection positioning
+        const screenX = (x - y) * half;
+        const screenY = (x + y) * quarter - z * depthRaise;
+
+        // slight perspective scale by depth
+        const scale = 1 - z * 0.03;
+        node.style.transform = `translate(${offsetX + screenX}px, ${offsetY + screenY}px) scale(${scale})`;
+        node.style.zIndex = 100 + x + y + z * 2; // ensure back-to-front paint order
+
+        container.appendChild(node);
+      }
+    }
+  }
 }

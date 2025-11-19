@@ -137,6 +137,10 @@ svg.atom{width:100%; height:100%}
 .mini.ion.cl{color:#06d6a0; border:1px solid rgba(6,214,160,0.5)}
 .bond-indicator{width:26px; height:6px; background:linear-gradient(90deg,var(--accent),var(--primary)); border-radius:6px; display:inline-block; box-shadow:0 0 8px rgba(0,212,255,0.6)}
 .lattice-view{position:relative; overflow:hidden; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); border-radius:18px; padding:20px; display:grid; grid-template-columns: repeat(8, 56px); gap:10px; justify-content:center}
+
+/* Split layout: 2D and Isometric side-by-side on laptops */
+.lattice-split{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start}
+
 .ion-node{position:relative; width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; cursor:pointer; transition: box-shadow .2s ease, transform .2s ease}
 .ion-node.na{color:#ffd166; background: radial-gradient(circle at 30% 30%, rgba(255,209,102,0.9), rgba(255,209,102,0.35)); box-shadow:0 4px 16px -4px rgba(255,209,102,0.5)}
 .ion-node.cl{color:#06d6a0; background: radial-gradient(circle at 30% 30%, rgba(6,214,160,0.9), rgba(6,214,160,0.35)); box-shadow:0 4px 16px -4px rgba(6,214,160,0.4)}
@@ -183,4 +187,30 @@ svg.atom{width:100%; height:100%}
      adjacent like-charged ions. */
   .lattice-view{grid-template-columns: repeat(8, 56px);}
   .ion-node{width:52px; height:52px}
+  .lattice-split{grid-template-columns:1fr}
 }
+
+/* -------- Isometric Lattice (3D impression) -------- */
+.lattice-iso-view{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.05);
+  border-radius:18px;
+  height:440px; /* canvas for cube (a bit taller for deeper z) */
+  box-shadow: var(--shadow);
+}
+.iso-node{
+  position:absolute;
+  width:34px; height:34px; border-radius:50%;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35));
+  transform: translate(-9999px,-9999px); /* will be overridden */
+}
+.iso-node.na{ 
+  background: radial-gradient(circle at 35% 30%, rgba(255,209,102,0.95), rgba(255,209,102,0.45));
+}
+.iso-node.cl{
+  background: radial-gradient(circle at 35% 30%, rgba(6,214,160,0.95), rgba(6,214,160,0.45));
+}
+/* subtle rim highlight */
+.iso-node::after{content:''; position:absolute; inset:0; border-radius:50%; box-shadow:inset 0 0 12px rgba(255,255,255,0.18)}
