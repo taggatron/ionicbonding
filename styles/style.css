@@ -130,10 +130,18 @@ svg.atom{width:100%; height:100%}
 
 /* Tighten padding and ensure full-bleed cards on narrow phones */
 @media (max-width: 420px){
+  /* Expand gradient canvas on phones so it fills full width */
+  body{
+    background:
+      radial-gradient(120vw 80vh at 80% -10%, rgba(124,77,255,0.3), transparent 60%),
+      radial-gradient(120vw 80vh at -10% 20%, rgba(0,212,255,0.25), transparent 60%),
+      var(--bg);
+    background-repeat:no-repeat;
+  }
   /* Refined mobile layout: use intrinsic width without 100vw to avoid overflow */
-  .container{max-width:100vw; margin:16px auto 32px; padding:0 12px; width:100vw;}
+  .container{max-width:100%; margin:16px auto 32px; padding:0 12px; width:100%;}
   /* Primary blocks span width but remain within container padding */
-  .card,.panel,.stepper,.lattice-split > div,.atoms-row,.drag-area{width:100vw;}
+  .card,.panel,.stepper,.lattice-split > div,.atoms-row,.drag-area{width:100%;}
   .intro{flex-direction:column; align-items:stretch}
   .cation-picker{min-width:0; width:100%}
   /* Allow ion cards to fill width but not exceed readable line length */
