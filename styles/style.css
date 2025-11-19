@@ -159,14 +159,21 @@ svg.atom{width:100%; height:100%}
 .dc-diagram.bracket .ion-charge{right:-15px; top:2px}
 .dc-electron{position:absolute; width:12px; height:12px; border-radius:50%; background:var(--electron); box-shadow:0 0 6px rgba(0,229,255,0.6)}
 .dc-electron.dot{background:var(--nonmetal)}
-.dc-electron.cross{background:var(--metal); transform:rotate(45deg); width:14px; height:14px; border-radius:4px; box-shadow:0 0 6px rgba(255,209,102,0.6)}
+/* Transferred electron: render as a light-blue cross */
+.dc-electron.cross{background:transparent; width:12px; height:12px; border-radius:0; box-shadow:none}
+.dc-electron.cross::before,.dc-electron.cross::after{content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:var(--electron); box-shadow:0 0 6px rgba(0,229,255,0.6); border-radius:2px}
+.dc-electron.cross::before{width:12px; height:2.5px}
+.dc-electron.cross::after{width:2.5px; height:12px}
 .dc-label{flex:1; min-width:220px; font-size:13px; color:var(--muted)}
 .dc-pending{opacity:.55; filter:grayscale(0.4)}
 .dc-legend{display:flex; gap:18px; font-size:12px; color:var(--muted); margin-top:8px; flex-wrap:wrap}
 .dc-legend span{display:flex; align-items:center; gap:6px}
 .legend-dot{width:12px; height:12px; background:var(--nonmetal); border-radius:50%}
 .legend-cross{width:14px; height:14px; background:var(--metal); transform:rotate(45deg); border-radius:4px}
-.legend-transferred{width:12px; height:12px; background:var(--electron); border-radius:50%; box-shadow:0 0 6px rgba(0,229,255,0.6)}
+.legend-transferred{position:relative; width:14px; height:14px; display:inline-block}
+.legend-transferred::before,.legend-transferred::after{content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:var(--electron); box-shadow:0 0 6px rgba(0,229,255,0.6); border-radius:2px}
+.legend-transferred::before{width:14px; height:3px}
+.legend-transferred::after{width:3px; height:14px}
 
 @media (max-width: 900px){
   .lattice-view{grid-template-columns: repeat(6, 52px);}
