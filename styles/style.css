@@ -176,6 +176,11 @@ svg.atom{width:100%; height:100%}
 .legend-transferred::after{width:3px; height:14px}
 
 @media (max-width: 900px){
-  .lattice-view{grid-template-columns: repeat(6, 52px);}
+  /* Maintain 8-column structure on small screens to preserve
+     vertical/horizontal alternation of ions (checkerboard).
+     Previously reduced to 6 columns which broke parity mapping
+     generated in JS (rows/cols assumed 8) causing occasional
+     adjacent like-charged ions. */
+  .lattice-view{grid-template-columns: repeat(8, 56px);}
   .ion-node{width:52px; height:52px}
 }
