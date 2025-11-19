@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ionic Bonding Interactive</title>
+  <meta name="description" content="Interactive animation to explore ionic bonding: electron transfer and ion formation with drag-and-drop." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <img src="assets/ionic-bond.svg" alt="Ionic Bond Icon" class="logo" />
+      <h1>Ionic Bonding Lab</h1>
+    </div>
+    <button class="btn ghost" id="resetBtn" aria-label="Reset simulation">Reset</button>
+  </header>
+
+  <main class="container">
+    <section class="intro card">
+      <h2>Explore how ionic bonds form</h2>
+      <p>Click the valence electron on the metal to transfer it to the non-metal. Then sort the ions into positive (cation) and negative (anion).</p>
+      <div class="legend">
+        <span class="dot metal"></span> Metal (loses electrons)
+        <span class="dot nonmetal"></span> Non-metal (gains electrons)
+        <span class="dot electron"></span> Electron
+      </div>
+    </section>
+
+    <nav class="stepper" aria-label="Steps">
+      <button class="step active" data-step="1"><span>1</span> Electron Transfer</button>
+      <button class="step" data-step="2"><span>2</span> Classify Ions</button>
+    </nav>
+
+    <section id="step1" class="panel active">
+      <div class="atoms-row">
+        <div class="atom-card">
+          <h3 class="atom-title">Sodium (Na) – metal</h3>
+          <div id="atom-metal" class="atom-stage" aria-live="polite"></div>
+          <p class="hint">Click the outer electron to transfer it.</p>
+        </div>
+        <div class="atom-card">
+          <h3 class="atom-title">Chlorine (Cl) – non-metal</h3>
+          <div id="atom-nonmetal" class="atom-stage" aria-live="polite"></div>
+          <p class="hint">Receives electron to complete its shell.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="toStep2" class="btn primary" disabled>Continue to Ion Classification</button>
+      </div>
+    </section>
+
+    <section id="step2" class="panel">
+      <div class="drag-area">
+        <div class="draggables">
+          <div class="ion-card draggable" draggable="true" data-ion="Na+" data-charge="positive" aria-grabbed="false">
+            <div class="ion-head">
+              <span class="symbol">Na</span><span class="charge">+</span>
+            </div>
+            <div class="ion-body">Sodium Ion</div>
+          </div>
+          <div class="ion-card draggable" draggable="true" data-ion="Cl-" data-charge="negative" aria-grabbed="false">
+            <div class="ion-head">
+              <span class="symbol">Cl</span><span class="charge">−</span>
+            </div>
+            <div class="ion-body">Chloride Ion</div>
+          </div>
+        </div>
+        <div class="dropzones">
+          <div class="dropzone" data-accept="positive" aria-label="Drop positive ions here">
+            <img src="assets/plus.svg" alt="Positive" />
+            <h4>Cation (Positive)</h4>
+          </div>
+          <div class="dropzone" data-accept="negative" aria-label="Drop negative ions here">
+            <img src="assets/minus.svg" alt="Negative" />
+            <h4>Anion (Negative)</h4>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="restart" class="btn ghost">Start Over</button>
+      </div>
+    </section>
+
+    <section class="explain card">
+      <h2>What is ionic bonding?</h2>
+      <p>
+        Ionic bonds form when a <strong>metal atom</strong> transfers one or more electrons to a <strong>non-metal atom</strong>. The metal becomes a
+        <em>positively charged cation</em> (it has lost electrons), while the non-metal becomes a <em>negatively charged anion</em> (it has gained electrons). The opposite charges attract, creating a strong electrostatic bond.
+      </p>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <small>Made for learning — interactive ionic bonding demo.</small>
+  </footer>
+
+  <script src="scripts/app.js"></script>
+</body>
+</html>

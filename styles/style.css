@@ -1,0 +1,121 @@
+/* Base */
+:root{
+  --bg: #0f1226;
+  --panel: rgba(255,255,255,0.06);
+  --card: rgba(255,255,255,0.08);
+  --text: #f8fbff;
+  --muted: #b9c4ff;
+  --primary: #7c4dff;
+  --accent: #00d4ff;
+  --good: #2dd36f;
+  --bad: #ff4961;
+  --metal: #ffd166;
+  --nonmetal: #06d6a0;
+  --electron: #00e5ff;
+  --shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  color:var(--text);
+  background: radial-gradient(1200px 800px at 80% -10%, rgba(124,77,255,0.3), transparent 60%),
+              radial-gradient(1000px 700px at -10% 20%, rgba(0,212,255,0.25), transparent 60%),
+              var(--bg);
+}
+
+/* Header */
+.app-header{
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 24px; backdrop-filter: blur(12px);
+  background: linear-gradient(180deg, rgba(15,18,38,0.9), rgba(15,18,38,0.6));
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.brand{display:flex; align-items:center; gap:12px}
+.brand .logo{width:28px; height:28px; filter: drop-shadow(0 4px 12px rgba(124,77,255,0.6))}
+.brand h1{font-size:18px; margin:0; letter-spacing:0.3px}
+
+/* Buttons */
+.btn{border:0; padding:10px 16px; border-radius:12px; cursor:pointer; font-weight:600;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;}
+.btn.primary{color:white; background: linear-gradient(135deg, var(--primary), #4e9eff)}
+.btn.primary:disabled{opacity:.5; cursor:not-allowed}
+.btn.ghost{color:var(--text); background: transparent; border:1px solid rgba(255,255,255,0.14)}
+.btn:hover{transform: translateY(-1px); box-shadow: 0 8px 22px rgba(0,0,0,0.25)}
+
+.container{max-width:1100px; margin:24px auto; padding:0 16px}
+.card{background:var(--card); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:16px; box-shadow: var(--shadow)}
+.intro{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap}
+.legend{display:flex; gap:18px; color:var(--muted); font-size:14px}
+.legend .dot{display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:middle}
+.legend .dot.metal{background:var(--metal)}
+.legend .dot.nonmetal{background:var(--nonmetal)}
+.legend .dot.electron{background:var(--electron)}
+
+/* Stepper */
+.stepper{display:flex; gap:12px; margin:20px 0}
+.step{
+  flex:1; display:flex; align-items:center; gap:10px; justify-content:center; cursor:pointer;
+  background:var(--panel); border:1px solid rgba(255,255,255,0.08); color:var(--muted);
+  padding:12px; border-radius:14px; font-weight:600; transition: background .2s ease, color .2s ease;
+}
+.step span{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.14)}
+.step.active{color:white; background: linear-gradient(180deg, rgba(124,77,255,0.35), rgba(124,77,255,0.05))}
+
+/* Panels */
+.panel{display:none; background:var(--panel); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:20px; box-shadow: var(--shadow)}
+.panel.active{display:block}
+
+.atoms-row{display:grid; grid-template-columns: 1fr 1fr; gap:18px}
+.atom-card{background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:16px}
+.atom-title{margin:0 0 8px; font-size:16px}
+.atom-stage{position:relative; height:360px; border-radius:14px; background: radial-gradient(120px 120px at 50% 40%, rgba(255,255,255,0.08), transparent), rgba(0,0,0,0.15); border:1px dashed rgba(255,255,255,0.12)}
+.hint{color:var(--muted); font-size:13px}
+
+.actions{display:flex; justify-content:center; margin-top:16px}
+
+/* Atom SVG visuals */
+svg.atom{width:100%; height:100%}
+.nucleus{fill:url(#nucleusGradient);}
+.shell{fill:none; stroke:rgba(255,255,255,0.18); stroke-width:2}
+.electron{fill:var(--electron); filter: drop-shadow(0 0 10px rgba(0,229,255,0.7)); cursor:pointer;}
+.electron.disabled{opacity:.35; cursor:default}
+.label{fill:#fff; font-weight:800; font-size:16px; text-anchor:middle}
+.charge-badge{position:absolute; top:10px; right:10px; padding:4px 8px; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1); border-radius:999px; font-weight:700}
+
+/* Transfer animation */
+@keyframes floaty{0%{transform:translateY(0)}50%{transform:translateY(-4px)}100%{transform:translateY(0)}}
+.floater{animation: floaty 2.4s ease-in-out infinite}
+
+/* Drag & Drop */
+.drag-area{display:grid; grid-template-columns: 1fr 1fr; gap:18px; align-items:start}
+.draggables{display:flex; gap:12px; flex-wrap:wrap}
+.ion-card{width:180px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:12px; box-shadow: var(--shadow); user-select:none}
+.ion-head{display:flex; align-items:flex-start; gap:6px; font-size:22px; font-weight:800}
+.ion-head .charge{color:var(--accent)}
+.ion-body{color:var(--muted); font-size:13px}
+.draggable{cursor:grab}
+.draggable:active{cursor:grabbing}
+.dropzones{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
+.dropzone{min-height:160px; display:grid; place-items:center; text-align:center; background:rgba(255,255,255,0.06); border:2px dashed rgba(255,255,255,0.18); border-radius:14px; padding:12px; transition: border-color .2s ease, background .2s ease}
+.dropzone img{width:40px; height:40px; opacity:.9; margin-bottom:8px}
+.dropzone h4{margin:4px 0 0}
+.dropzone.over{border-color: var(--accent); background: rgba(0,212,255,0.08)}
+.dropzone.correct{border-color: var(--good)}
+.dropzone.incorrect{border-color: var(--bad)}
+
+/* Shake for wrong drop */
+@keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}100%{transform:translateX(0)}}
+.shake{animation: shake .35s}
+
+/* Footer */
+.app-footer{opacity:.8; color:var(--muted); text-align:center; padding:24px}
+
+/* Responsive */
+@media (max-width: 900px){
+  .atoms-row{grid-template-columns:1fr}
+  .drag-area{grid-template-columns:1fr}
+  .dropzones{grid-template-columns:1fr}
+}
