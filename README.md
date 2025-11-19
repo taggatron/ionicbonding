@@ -10,6 +10,7 @@ An interactive, bright-styled simulation demonstrating ionic bonding by electron
 - Drag-and-drop activity to classify ions into cation and anion
 - Modern gradient theme with subtle motion and responsive layout
 - Giant ionic lattice slice showing multi-directional bonding (hover to see neighbors)
+- Cation selector: switch between Na (1e− transfer) and Mg (2e− transfer forming MgCl₂)
 
 ## Run locally
 
@@ -29,7 +30,7 @@ Or use VS Code Live Server.
 - Two SVG-based Bohr diagrams are rendered for Sodium and Chlorine.
 - Clicking the Na valence electron removes it from Na and animates it to the next slot in Cl's outer shell.
 - The UI updates to show `+1` for Na and `-1` for Cl, enabling Step 2.
-- In Step 2, drag `Na+` to the Cation zone and `Cl−` to the Anion zone.
+- In Step 2, drag ions to zones. For sodium: `Na+` and `Cl−`. For magnesium: `Mg2+` and two `Cl−` ions.
 
 ## Reset
 

@@ -28,6 +28,14 @@
         <span class="dot nonmetal"></span> Non-metal (gains electrons)
         <span class="dot electron"></span> Electron
       </div>
+      <div class="cation-picker">
+        <label for="cationSelect">Cation:</label>
+        <select id="cationSelect">
+          <option value="Na" selected>Sodium (Na, Group 1)</option>
+          <option value="Mg">Magnesium (Mg, Group 2)</option>
+        </select>
+        <small class="picker-note">Magnesium transfers two electrons forming Mg<sup>2+</sup> and requires two chloride ions (MgCl<sub>2</sub>).</small>
+      </div>
     </section>
 
     <nav class="stepper" aria-label="Steps">
@@ -36,16 +44,16 @@
     </nav>
 
     <section id="step1" class="panel active">
-      <div class="atoms-row">
-        <div class="atom-card">
-          <h3 class="atom-title">Sodium (Na) – metal</h3>
+      <div class="atoms-row" id="atomsRow">
+        <div class="atom-card" id="metalCard">
+          <h3 class="atom-title" id="metalTitle">Sodium (Na) – metal</h3>
           <div id="atom-metal" class="atom-stage" aria-live="polite"></div>
-          <p class="hint">Click the outer electron to transfer it.</p>
+          <p class="hint" id="metalHint">Click the outer electron to transfer it.</p>
         </div>
-        <div class="atom-card">
-          <h3 class="atom-title">Chlorine (Cl) – non-metal</h3>
+        <div class="atom-card" id="nonmetalCard">
+          <h3 class="atom-title" id="nonmetalTitle">Chlorine (Cl) – non-metal</h3>
           <div id="atom-nonmetal" class="atom-stage" aria-live="polite"></div>
-          <p class="hint">Receives electron to complete its shell.</p>
+          <p class="hint" id="nonmetalHint">Receives electron to complete its shell.</p>
         </div>
       </div>
       <div class="actions">

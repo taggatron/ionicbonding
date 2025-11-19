@@ -8,12 +8,15 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
 const state = {
-  transferred: false,
+  cation: 'Na',
+  transferredCount: 0,
+  requiredTransfers: 1,
   metalCharge: 0,
-  nonmetalCharge: 0,
+  nonmetalCharges: [], // array for multiple non-metals
 };
 
 function init() {
+  setupCationPicker();
   mountAtoms();
   setupStepper();
   setupDragAndDrop();
@@ -44,27 +47,19 @@ function setupReset(){
 }
 
 function resetAll(){
-  // Reset state
-  state.transferred = false;
+  state.transferredCount = 0;
   state.metalCharge = 0;
-  state.nonmetalCharge = 0;
-  // Reset UI
+  state.nonmetalCharges = [];
+  state.requiredTransfers = state.cation === 'Mg' ? 2 : 1;
   $('#atom-metal').innerHTML = '';
   $('#atom-nonmetal').innerHTML = '';
   mountAtoms();
   $('#toStep2').disabled = true;
   setActiveStep('1');
-  // Reset drag area
-  const draggables = $('.draggables');
-  draggables.innerHTML = '';
-  draggables.appendChild(createIonCard('Na', '+', 'positive'));
-  draggables.appendChild(createIonCard('Cl', '−', 'negative'));
-  $$('.dropzone').forEach(z=>{
-    z.classList.remove('correct','incorrect','over');
-  });
+  buildIonCards();
+  $$('.dropzone').forEach(z=>z.classList.remove('correct','incorrect','over'));
   setupDragAndDrop();
-  // Reset lattice
-  $('#latticeView').innerHTML = '';
+  $('#latticeView').innerHTML='';
   initLattice();
 }
 
@@ -179,38 +174,63 @@ class Atom {
   }
 }
 
-let metalAtom, nonMetalAtom;
+let metalAtom; // single
+let nonMetalAtom; // single (Na case) OR null when group2
+let nonMetalAtoms = []; // array when Mg selected
 
 function mountAtoms(){
   const metalStage = $('#atom-metal');
   const nonmetalStage = $('#atom-nonmetal');
+  nonmetalStage.classList.remove('sub-nonmetals');
 
-  metalAtom = new Atom({
-    container: metalStage,
-    name: 'Sodium',
-    symbol: 'Na',
-    shells: [2, 8, 1], // 11 e-
-    theme: 'metal'
-  });
+  if(state.cation === 'Na'){
+    $('#metalTitle').textContent = 'Sodium (Na) – metal';
+    $('#nonmetalTitle').textContent = 'Chlorine (Cl) – non-metal';
+    $('#metalHint').textContent = 'Click the outer electron to transfer it.';
+    $('#nonmetalHint').textContent = 'Receives electron to complete its shell.';
 
-  nonMetalAtom = new Atom({
-    container: nonmetalStage,
-    name: 'Chlorine',
-    symbol: 'Cl',
-    shells: [2, 8, 7], // 17 e-
-    theme: 'nonmetal'
-  });
+    metalAtom = new Atom({
+      container: metalStage,
+      name: 'Sodium',
+      symbol: 'Na',
+      shells: [2,8,1],
+      theme: 'metal'
+    });
+    nonMetalAtom = new Atom({
+      container: nonmetalStage,
+      name: 'Chlorine',
+      symbol: 'Cl',
+      shells: [2,8,7],
+      theme: 'nonmetal'
+    });
+    nonMetalAtoms = [nonMetalAtom];
+  } else { // Mg
+    $('#metalTitle').textContent = 'Magnesium (Mg) – metal';
+    $('#nonmetalTitle').textContent = 'Chlorine (Cl) – non-metals (x2)';
+    $('#metalHint').textContent = 'Click each outer electron (2) to transfer.';
+    $('#nonmetalHint').textContent = 'Each chlorine receives one electron.';
 
-  // Activate only metal's valence electron(s)
+    metalAtom = new Atom({
+      container: metalStage,
+      name: 'Magnesium',
+      symbol: 'Mg',
+      shells: [2,8,2],
+      theme: 'metal'
+    });
+    // Render two chlorine mini stages
+    nonmetalStage.classList.add('sub-nonmetals');
+    const clA = document.createElement('div'); clA.className='mini-stage'; nonmetalStage.appendChild(clA);
+    const clB = document.createElement('div'); clB.className='mini-stage'; nonmetalStage.appendChild(clB);
+    const atomA = new Atom({container: clA, name:'Chlorine', symbol:'Cl', shells:[2,8,7], theme:'nonmetal'});
+    const atomB = new Atom({container: clB, name:'Chlorine', symbol:'Cl', shells:[2,8,7], theme:'nonmetal'});
+    nonMetalAtoms = [atomA, atomB];
+  }
+
+  // Activate only metal's valence electrons
   const clickable = metalAtom.valenceElectrons();
-  clickable.forEach(e => {
-    e.addEventListener('click', ()=>transferElectron(e));
-  });
-  // Visually disable non-valence electrons from all
-  metalAtom.electronRefs.forEach(e => {
-    if(!clickable.includes(e)) e.classList.add('disabled');
-  });
-  nonMetalAtom.electronRefs.forEach(e => e.classList.add('disabled'));
+  clickable.forEach(e => e.addEventListener('click', () => transferElectron(e)));
+  metalAtom.electronRefs.forEach(e => { if(!clickable.includes(e)) e.classList.add('disabled'); });
+  nonMetalAtoms.forEach(atom => atom.electronRefs.forEach(e => e.classList.add('disabled')));
 }
 
 function svgToScreenCoords(svgElem, cx, cy){
@@ -222,61 +242,54 @@ function svgToScreenCoords(svgElem, cx, cy){
 }
 
 function transferElectron(clickedElectron){
-  if(state.transferred) return;
+  if(state.transferredCount >= state.requiredTransfers) return;
 
-  // Determine start (metal valence approx center)
-  const mIdx = metalAtom.shells.length - 1;
-  const r = 70 + mIdx * metalAtom.radiusStep;
-  // Pick current electron position
+  // Determine start position
   const start = {
     x: Number(clickedElectron.getAttribute('cx')),
     y: Number(clickedElectron.getAttribute('cy'))
   };
 
-  // Target on non-metal
-  const target = nonMetalAtom.nextNonmetalSlotPosition();
+  // Choose target non-metal needing electron (first with valence < 8)
+  const targetAtom = nonMetalAtoms.find(a => a.shells[a.shells.length-1] < 8);
+  if(!targetAtom) return;
+  const target = targetAtom.nextNonmetalSlotPosition();
 
-  // Create a floating electron element absolutely positioned over the page for smooth cross-SVG animation
   const floating = document.createElement('div');
-  floating.style.position = 'fixed';
-  floating.style.width = '10px';
-  floating.style.height = '10px';
-  floating.style.borderRadius = '50%';
-  floating.style.background = 'var(--electron)';
-  floating.style.boxShadow = '0 0 12px rgba(0,229,255,0.9)';
-  floating.style.zIndex = 5;
-
-  const metalBox = metalAtom.root.getBoundingClientRect();
-  const nonmetalBox = nonMetalAtom.root.getBoundingClientRect();
-
+  Object.assign(floating.style, {
+    position:'fixed', width:'10px', height:'10px', borderRadius:'50%', background:'var(--electron)', boxShadow:'0 0 12px rgba(0,229,255,0.9)', zIndex:5
+  });
   const startScreen = svgToScreenCoords(metalAtom.root, start.x, start.y);
-  const targetScreen = svgToScreenCoords(nonMetalAtom.root, target.x, target.y);
-
-  floating.style.left = `${startScreen.x - 5}px`;
-  floating.style.top = `${startScreen.y - 5}px`;
-
+  const targetScreen = svgToScreenCoords(targetAtom.root, target.x, target.y);
+  floating.style.left = `${startScreen.x - 5}px`; floating.style.top = `${startScreen.y - 5}px`;
   document.body.appendChild(floating);
 
-  // Remove electron from metal
   metalAtom.removeValenceElectron();
 
-  // Animate to target
   floating.animate([
-    { transform: 'translate(0,0)' },
-    { transform: `translate(${targetScreen.x - startScreen.x}px, ${targetScreen.y - startScreen.y}px)` }
-  ], {
-    duration: 900,
-    easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)'
-  }).onfinish = () => {
+    { transform:'translate(0,0)' },
+    { transform:`translate(${targetScreen.x - startScreen.x}px, ${targetScreen.y - startScreen.y}px)` }
+  ], {duration:900, easing:'cubic-bezier(0.2,0.8,0.2,1)'}).onfinish = () => {
     floating.remove();
-    nonMetalAtom.addValenceElectronAt(target.x, target.y);
-    state.transferred = true;
-    state.metalCharge = +1; // lost one e-
-    state.nonmetalCharge = -1; // gained one e-
-    metalAtom.showChargeBadge(state.metalCharge);
-    nonMetalAtom.showChargeBadge(state.nonmetalCharge);
-    $('#toStep2').disabled = false;
-    $('#toStep2').focus();
+    targetAtom.addValenceElectronAt(target.x, target.y);
+    state.transferredCount++;
+    // Update charges
+    state.metalCharge = state.transferredCount * (state.cation === 'Mg' ? +1 : +1); // will display +2 eventually
+    metalAtom.showChargeBadge(state.cation === 'Mg' ? `+${state.transferredCount}` : `+${state.transferredCount}`);
+    nonMetalAtoms.forEach((a,i)=>{
+      const valence = a.shells[a.shells.length-1];
+      const gained = valence - (state.cation==='Mg'?7:7); // base 7 -> gained 0 or 1
+      a.showChargeBadge(gained === 1 ? '-1' : '');
+    });
+    if(state.transferredCount >= state.requiredTransfers){
+      // finalize charges
+      if(state.cation === 'Mg') metalAtom.showChargeBadge('+2'); else metalAtom.showChargeBadge('+1');
+      nonMetalAtoms.forEach(a=>{
+        a.showChargeBadge('-1');
+      });
+      $('#toStep2').disabled = false;
+      $('#toStep2').focus();
+    }
   };
 }
 
@@ -343,8 +356,9 @@ function setupDragAndDrop(){
 }
 
 function checkCompletion(){
+  const totalNeeded = state.cation === 'Mg' ? 3 : 2; // Mg2+ plus 2 Cl- vs Na+ plus Cl-
   const placed = $$('.dropzone .ion-card').length;
-  if(placed === 2){
+  if(placed === totalNeeded){
     // brief confetti-like pulse
     $$('.dropzone').forEach(z => {
       z.animate([
@@ -354,6 +368,34 @@ function checkCompletion(){
       ], { duration: 350, easing: 'ease-out' });
     });
   }
+}
+
+function buildIonCards(){
+  const draggables = $('.draggables');
+  draggables.innerHTML = '';
+  if(state.cation === 'Na'){
+    draggables.appendChild(createIonCard('Na', '+', 'positive'));
+    draggables.appendChild(createIonCard('Cl', '−', 'negative'));
+  } else { // MgCl2
+    const mgCard = document.createElement('div');
+    mgCard.className = 'ion-card draggable';
+    mgCard.setAttribute('draggable','true');
+    mgCard.dataset.ion = 'Mg2+';
+    mgCard.dataset.charge = 'positive';
+    mgCard.innerHTML = `<div class="ion-head"><span class="symbol">Mg</span><span class="charge">2+</span></div><div class="ion-body">Magnesium Ion</div>`;
+    draggables.appendChild(mgCard);
+    // Two chloride ions
+    draggables.appendChild(createIonCard('Cl', '−', 'negative'));
+    draggables.appendChild(createIonCard('Cl', '−', 'negative'));
+  }
+}
+
+function setupCationPicker(){
+  const sel = $('#cationSelect');
+  sel.addEventListener('change', () => {
+    state.cation = sel.value;
+    resetAll();
+  });
 }
 
 /* ---------- Giant Ionic Lattice (2D slice) ---------- */
