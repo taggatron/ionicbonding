@@ -490,7 +490,10 @@ function renderAnionDiagram(symbol, charge, transferredCount){
 function initLattice(){
   const container = $('#latticeView');
   if(!container) return;
-  const rows = 7; const cols = 7; // reduced to 7x7 to better match isometric view and save space
+  // Determine lattice size based on mobile portrait breakpoint
+  const isMobilePortrait = () => window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches;
+  const rows = isMobilePortrait() ? 5 : 7;
+  const cols = isMobilePortrait() ? 5 : 7;
   // Alternating Na+ / Cl- pattern (checkerboard) for 2D slice
   for(let r=0;r<rows;r++){
     for(let c=0;c<cols;c++){
@@ -505,6 +508,19 @@ function initLattice(){
       node.addEventListener('mouseleave', clearBondLines);
       container.appendChild(node);
     }
+  }
+
+  // Attach resize/orientation listeners once to dynamically rebuild lattice if orientation changes
+  if(!window.__latticeListenersAttached){
+    const reflow = () => {
+      const cont = $('#latticeView');
+      if(!cont) return;
+      cont.innerHTML = '';
+      initLattice();
+    };
+    window.addEventListener('resize', reflow);
+    window.matchMedia('(orientation: portrait)').addEventListener('change', reflow);
+    window.__latticeListenersAttached = true;
   }
 }
 
