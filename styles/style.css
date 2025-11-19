@@ -155,6 +155,8 @@ svg.atom{width:100%; height:100%}
 .dc-diagram.bracket::before{left:4px; border-right:none; box-shadow:0 0 8px rgba(255,255,255,0.15)}
 .dc-diagram.bracket::after{right:4px; border-left:none; box-shadow:0 0 8px rgba(255,255,255,0.15)}
 .dc-diagram .ion-charge{position:absolute; top:4px; right:6px; font-size:14px; font-weight:800; color:var(--accent)}
+/* Position charge outside, to the right of the bracketed box */
+.dc-diagram.bracket .ion-charge{right:-15px; top:2px}
 .dc-electron{position:absolute; width:12px; height:12px; border-radius:50%; background:var(--electron); box-shadow:0 0 6px rgba(0,229,255,0.6)}
 .dc-electron.dot{background:var(--nonmetal)}
 .dc-electron.cross{background:var(--metal); transform:rotate(45deg); width:14px; height:14px; border-radius:4px; box-shadow:0 0 6px rgba(255,209,102,0.6)}
