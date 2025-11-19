@@ -135,7 +135,17 @@ class Atom {
   removeValenceElectron(){
     const valence = this.valenceElectrons();
     if(valence.length === 0) return null;
-    const e = valence[valence.length - 1];
+    // Support removing the specific clicked electron to avoid leaving the
+    // originally clicked one visible (Mg case had mismatch when removing last).
+    // If a target was passed (first arg), remove that; else remove last.
+    // We allow optional parameter for backward compatibility.
+    let target = arguments[0];
+    let e;
+    if(target && valence.includes(target)){
+      e = target;
+    } else {
+      e = valence[valence.length - 1];
+    }
     e.remove();
     const idx = this.shells.length - 1;
     this.shells[idx] = Math.max(0, this.shells[idx]-1);
@@ -280,7 +290,8 @@ function transferElectron(clickedElectron){
   floating.style.left = `${startScreen.x - 5}px`; floating.style.top = `${startScreen.y - 5}px`;
   document.body.appendChild(floating);
 
-  metalAtom.removeValenceElectron();
+  // Remove the specific electron clicked to ensure correct visual disappearance
+  metalAtom.removeValenceElectron(clickedElectron);
 
   floating.animate([
     { transform:'translate(0,0)' },
