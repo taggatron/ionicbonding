@@ -18,6 +18,7 @@ function init() {
   setupStepper();
   setupDragAndDrop();
   setupReset();
+  initLattice();
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -62,6 +63,9 @@ function resetAll(){
     z.classList.remove('correct','incorrect','over');
   });
   setupDragAndDrop();
+  // Reset lattice
+  $('#latticeView').innerHTML = '';
+  initLattice();
 }
 
 /* ---------- Atom and Electron rendering ---------- */
@@ -350,4 +354,88 @@ function checkCompletion(){
       ], { duration: 350, easing: 'ease-out' });
     });
   }
+}
+
+/* ---------- Giant Ionic Lattice (2D slice) ---------- */
+function initLattice(){
+  const container = $('#latticeView');
+  if(!container) return;
+  const rows = 8; const cols = 8;
+  // Alternating Na+ / Cl- pattern (checkerboard) for 2D slice
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const isNa = (r + c) % 2 === 0; // alternate
+      const node = document.createElement('div');
+      node.className = 'ion-node ' + (isNa ? 'na' : 'cl');
+      node.dataset.type = isNa ? 'Na+' : 'Cl−';
+      node.textContent = isNa ? 'Na+' : 'Cl−';
+      node.dataset.row = r;
+      node.dataset.col = c;
+      node.addEventListener('mouseenter', () => highlightNeighbors(node, rows, cols));
+      node.addEventListener('mouseleave', clearBondLines);
+      container.appendChild(node);
+    }
+  }
+}
+
+function highlightNeighbors(node, rows, cols){
+  clearBondLines();
+  node.classList.add('focused');
+  const r = Number(node.dataset.row); const c = Number(node.dataset.col);
+  const container = $('#latticeView');
+  const directions = [ [0,1], [1,0], [0,-1], [-1,0] ]; // planar neighbors
+  directions.forEach(([dr, dc]) => {
+    const nr = r + dr; const nc = c + dc;
+    if(nr < 0 || nr >= rows || nc < 0 || nc >= cols) return;
+    const neighbor = container.querySelector(`.ion-node[data-row='${nr}'][data-col='${nc}']`);
+    if(!neighbor) return;
+    drawBondLine(node, neighbor);
+  });
+  // Indicate out-of-plane neighbors (above/below) with subtle ghost circles
+  addVerticalGhosts(node);
+}
+
+function elementCenter(el){
+  const rect = el.getBoundingClientRect();
+  return {x: rect.left + rect.width/2, y: rect.top + rect.height/2};
+}
+
+function drawBondLine(a, b){
+  const container = $('#latticeView');
+  const ca = elementCenter(a); const cb = elementCenter(b);
+  // Convert global to container coordinates
+  const cRect = container.getBoundingClientRect();
+  const x1 = ca.x - cRect.left; const y1 = ca.y - cRect.top;
+  const x2 = cb.x - cRect.left; const y2 = cb.y - cRect.top;
+  const dx = x2 - x1; const dy = y2 - y1; const dist = Math.sqrt(dx*dx + dy*dy);
+  const line = document.createElement('div');
+  line.className = 'bond-line';
+  line.style.left = x1 + 'px';
+  line.style.top = (y1 - 2) + 'px';
+  line.style.width = dist + 'px';
+  line.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+  container.appendChild(line);
+}
+
+function addVerticalGhosts(node){
+  const container = $('#latticeView');
+  const pos = elementCenter(node);
+  const cRect = container.getBoundingClientRect();
+  const baseX = pos.x - cRect.left; const baseY = pos.y - cRect.top;
+  ['above','below'].forEach((dir,i)=>{
+    const ghost = document.createElement('div');
+    ghost.className = 'bond-line';
+    ghost.style.width = '28px';
+    ghost.style.left = (baseX - 14) + 'px';
+    ghost.style.top = (baseY - (dir==='above'?40:-40)) + 'px';
+    ghost.style.opacity = '0.35';
+    ghost.style.background = 'linear-gradient(90deg,var(--accent),transparent)';
+    ghost.style.transform = 'rotate(0deg)';
+    container.appendChild(ghost);
+  });
+}
+
+function clearBondLines(){
+  $('#latticeView').querySelectorAll('.bond-line').forEach(l=>l.remove());
+  $('#latticeView').querySelectorAll('.ion-node.focused').forEach(n=>n.classList.remove('focused'));
 }

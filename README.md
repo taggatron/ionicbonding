@@ -9,6 +9,7 @@ An interactive, bright-styled simulation demonstrating ionic bonding by electron
 - Charge badges update after transfer (`Na+`, `Cl−`)
 - Drag-and-drop activity to classify ions into cation and anion
 - Modern gradient theme with subtle motion and responsive layout
+- Giant ionic lattice slice showing multi-directional bonding (hover to see neighbors)
 
 ## Run locally
 
