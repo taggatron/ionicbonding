@@ -61,6 +61,7 @@ function resetAll(){
   setupDragAndDrop();
   $('#latticeView').innerHTML='';
   initLattice();
+  initDotCrossPending();
 }
 
 /* ---------- Atom and Electron rendering ---------- */
@@ -170,7 +171,22 @@ class Atom {
       badge.className = 'charge-badge';
       this.container.appendChild(badge);
     }
-    badge.textContent = charge > 0 ? `+${charge}` : `${charge}`;
+    let display;
+    if(typeof charge === 'number'){
+      if(charge === 0){
+        display = '0';
+      } else {
+        display = (charge > 0 ? '+' : '') + charge;
+      }
+    } else {
+      const str = String(charge).trim();
+      if(str === '') display = '';
+      else if(/^[+-]/.test(str)) display = str; // already has sign
+      else if(/^\d+$/.test(str)) display = '+' + str; // plain digits assume positive
+      else display = str;
+    }
+    badge.textContent = display;
+    if(display === '') badge.style.visibility = 'hidden'; else badge.style.visibility = 'visible';
   }
 }
 
@@ -274,21 +290,20 @@ function transferElectron(clickedElectron){
     targetAtom.addValenceElectronAt(target.x, target.y);
     state.transferredCount++;
     // Update charges
-    state.metalCharge = state.transferredCount * (state.cation === 'Mg' ? +1 : +1); // will display +2 eventually
-    metalAtom.showChargeBadge(state.cation === 'Mg' ? `+${state.transferredCount}` : `+${state.transferredCount}`);
+    state.metalCharge = state.transferredCount;
+    metalAtom.showChargeBadge(state.metalCharge);
     nonMetalAtoms.forEach((a,i)=>{
       const valence = a.shells[a.shells.length-1];
       const gained = valence - (state.cation==='Mg'?7:7); // base 7 -> gained 0 or 1
-      a.showChargeBadge(gained === 1 ? '-1' : '');
+      a.showChargeBadge(gained === 1 ? -1 : '');
     });
     if(state.transferredCount >= state.requiredTransfers){
       // finalize charges
-      if(state.cation === 'Mg') metalAtom.showChargeBadge('+2'); else metalAtom.showChargeBadge('+1');
-      nonMetalAtoms.forEach(a=>{
-        a.showChargeBadge('-1');
-      });
+      if(state.cation === 'Mg') metalAtom.showChargeBadge(2); else metalAtom.showChargeBadge(1);
+      nonMetalAtoms.forEach(a=> a.showChargeBadge(-1));
       $('#toStep2').disabled = false;
       $('#toStep2').focus();
+      buildDotCrossDiagrams();
     }
   };
 }
@@ -396,6 +411,65 @@ function setupCationPicker(){
     state.cation = sel.value;
     resetAll();
   });
+}
+
+/* ---------- Dot & Cross Diagram Rendering ---------- */
+function initDotCrossPending(){
+  const grid = $('#dcGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  $('#dcIntro').textContent = 'Complete the electron transfer to reveal ionic dot-and-cross diagrams.';
+  // Show placeholder diagrams (neutral) faded
+  const neutral = document.createElement('div');
+  neutral.className = 'dc-diagram dc-pending';
+  neutral.textContent = state.cation;
+  grid.appendChild(neutral);
+  const neutralCl = document.createElement('div');
+  neutralCl.className = 'dc-diagram dc-pending';
+  neutralCl.textContent = 'Cl';
+  grid.appendChild(neutralCl);
+}
+
+function buildDotCrossDiagrams(){
+  const grid = $('#dcGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  $('#dcIntro').textContent = 'Ionic dot-and-cross diagrams (valence shell shown with bracket notation).';
+  if(state.cation === 'Na'){
+    grid.appendChild(renderCationDiagram('Na', '+1'));
+    grid.appendChild(renderAnionDiagram('Cl', '-1', 1));
+  } else {
+    grid.appendChild(renderCationDiagram('Mg', '+2'));
+    grid.appendChild(renderAnionDiagram('Cl', '-1', 1));
+    grid.appendChild(renderAnionDiagram('Cl', '-1', 1));
+  }
+}
+
+function renderCationDiagram(symbol, charge){
+  const d = document.createElement('div');
+  d.className = 'dc-diagram bracket';
+  d.innerHTML = `<span class="ion-charge">${charge}</span>${symbol}`;
+  return d;
+}
+
+function renderAnionDiagram(symbol, charge, transferredCount){
+  const d = document.createElement('div');
+  d.className = 'dc-diagram bracket';
+  d.innerHTML = `<span class="ion-charge">${charge}</span>${symbol}`;
+  // positions around box (clockwise from top)
+  const positions = [
+    ['50%', '6%'], ['80%', '20%'], ['94%', '50%'], ['80%', '80%'], ['50%', '94%'], ['20%', '80%'], ['6%', '50%'], ['20%', '20%']
+  ];
+  // 7 original non-metal electrons shown as dots; transferred ones as crosses (here 1 per Cl)
+  const transferredIndices = [];
+  for(let i=0;i<transferredCount;i++){ transferredIndices.push((i*2) % 8); }
+  positions.forEach((pos, idx)=>{
+    const el = document.createElement('div');
+    el.className = 'dc-electron ' + (transferredIndices.includes(idx) ? 'cross' : 'dot');
+    el.style.left = `calc(${pos[0]} - 6px)`; el.style.top = `calc(${pos[1]} - 6px)`;
+    d.appendChild(el);
+  });
+  return d;
 }
 
 /* ---------- Giant Ionic Lattice (2D slice) ---------- */

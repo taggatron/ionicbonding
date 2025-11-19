@@ -76,7 +76,7 @@ body{
 .atoms-row{display:grid; grid-template-columns: 1fr 1fr; gap:18px}
 .atom-card{background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:16px}
 .atom-title{margin:0 0 8px; font-size:16px}
-.atom-stage{position:relative; height:360px; border-radius:14px; background: radial-gradient(120px 120px at 50% 40%, rgba(255,255,255,0.08), transparent), rgba(0,0,0,0.15); border:1px dashed rgba(255,255,255,0.12)}
+.atom-stage{position:relative; height:360px; border-radius:14px; background:#161c2e; /* solid to block page gradient */ border:1px dashed rgba(255,255,255,0.12)}
 .hint{color:var(--muted); font-size:13px}
 .atoms-row.dual-nonmetal{grid-template-columns: 1fr 1fr 1fr}
 .sub-nonmetals{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
@@ -145,6 +145,26 @@ svg.atom{width:100%; height:100%}
 @keyframes bondFade{to{opacity:1}}
 .ion-node.focused{outline:2px solid var(--accent); outline-offset:4px}
 .note{font-size:12px; color:var(--muted); margin-top:14px}
+
+/* -------- Dot & Cross Diagrams -------- */
+.dot-cross-section{margin-top:32px}
+.dot-cross-grid{display:flex; flex-wrap:wrap; gap:24px; margin-top:12px}
+.dc-diagram{position:relative; width:150px; height:150px; border:3px solid rgba(255,255,255,0.18); border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:20px; letter-spacing:.5px; background:#1c2437}
+.dc-diagram.bracket{border:none;}
+.dc-diagram.bracket::before,.dc-diagram.bracket::after{content:''; position:absolute; top:10px; bottom:10px; width:20px; border:3px solid rgba(255,255,255,0.5); border-radius:8px; pointer-events:none;}
+.dc-diagram.bracket::before{left:4px; border-right:none; box-shadow:0 0 8px rgba(255,255,255,0.15)}
+.dc-diagram.bracket::after{right:4px; border-left:none; box-shadow:0 0 8px rgba(255,255,255,0.15)}
+.dc-diagram .ion-charge{position:absolute; top:4px; right:6px; font-size:14px; font-weight:800; color:var(--accent)}
+.dc-electron{position:absolute; width:12px; height:12px; border-radius:50%; background:var(--electron); box-shadow:0 0 6px rgba(0,229,255,0.6)}
+.dc-electron.dot{background:var(--nonmetal)}
+.dc-electron.cross{background:var(--metal); transform:rotate(45deg); width:14px; height:14px; border-radius:4px; box-shadow:0 0 6px rgba(255,209,102,0.6)}
+.dc-label{flex:1; min-width:220px; font-size:13px; color:var(--muted)}
+.dc-pending{opacity:.55; filter:grayscale(0.4)}
+.dc-legend{display:flex; gap:18px; font-size:12px; color:var(--muted); margin-top:8px; flex-wrap:wrap}
+.dc-legend span{display:flex; align-items:center; gap:6px}
+.legend-dot{width:12px; height:12px; background:var(--nonmetal); border-radius:50%}
+.legend-cross{width:14px; height:14px; background:var(--metal); transform:rotate(45deg); border-radius:4px}
+.legend-transferred{width:12px; height:12px; background:var(--electron); border-radius:50%; box-shadow:0 0 6px rgba(0,229,255,0.6)}
 
 @media (max-width: 900px){
   .lattice-view{grid-template-columns: repeat(6, 52px);}
