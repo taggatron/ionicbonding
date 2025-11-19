@@ -490,7 +490,7 @@ function renderAnionDiagram(symbol, charge, transferredCount){
 function initLattice(){
   const container = $('#latticeView');
   if(!container) return;
-  const rows = 8; const cols = 8;
+  const rows = 7; const cols = 7; // reduced to 7x7 to better match isometric view and save space
   // Alternating Na+ / Cl- pattern (checkerboard) for 2D slice
   for(let r=0;r<rows;r++){
     for(let c=0;c<cols;c++){
@@ -580,7 +580,7 @@ function initIsoLattice(){
   const quarter = spacing * 0.25;
   const depthRaise = spacing * 0.6; // increased vertical lift per layer for a more cubic appearance
   const offsetX = container.clientWidth / 2; // center cube horizontally
-  const offsetY = 280; // baseline vertical position adjusted for increased depth
+  const offsetY = 240; // lifted upward slightly to center cube better
 
   // Build nodes with 3D parity alternation: (x+y+z) even = Na+, odd = Cl−
   for(let z=0; z<N; z++){
