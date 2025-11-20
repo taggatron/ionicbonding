@@ -133,6 +133,23 @@
       <p class="note">This repeating pattern creates a rigid, high melting structure.</p>
     </section>
 
+    <!-- Interactive Multiple Choice Quiz -->
+    <section class="quiz-section card" id="quizSection" aria-labelledby="quizHeading">
+      <h2 id="quizHeading">Practice Questions</h2>
+      <p class="quiz-intro">Test your understanding of ionic bonding. Select the best answer; feedback and explanations appear instantly. Works one question at a time for small screens.</p>
+      <div class="quiz-core">
+        <div class="quiz-progress" id="quizProgress" aria-live="polite"></div>
+        <div class="quiz-question" id="quizQuestion" aria-live="polite"></div>
+        <div class="quiz-options" id="quizOptions" role="group" aria-label="Answer choices"></div>
+        <div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>
+        <div class="quiz-nav">
+          <button class="btn ghost" id="quizPrev" disabled>Previous</button>
+          <button class="btn primary" id="quizNext" disabled>Next</button>
+        </div>
+      </div>
+      <div class="quiz-summary" id="quizSummary" hidden aria-live="polite"></div>
+    </section>
+
     
   </main>
 

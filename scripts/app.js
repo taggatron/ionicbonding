@@ -23,6 +23,7 @@ function init() {
   setupReset();
   initLattice();
   initIsoLattice();
+  initQuiz();
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -619,4 +620,104 @@ function initIsoLattice(){
       }
     }
   }
+}
+
+/* ---------- Quiz Rendering ---------- */
+const quizData = [
+  { q: 'What happens to a metal atom in ionic bonding?', options: ['Gains electrons to become negative', 'Loses electrons to become a positive ion', 'Shares electrons equally with a non-metal', 'Splits its nucleus'], answer: 1, explanation: 'Metals lose one or more electrons forming positive cations.' },
+  { q: 'What is the charge on a chloride ion after gaining one electron?', options: ['2−', '1−', '1+', 'Neutral'], answer: 1, explanation: 'Chlorine atom gains one electron to complete its octet forming Cl⁻.' },
+  { q: 'Why do Na⁺ and Cl⁻ ions attract each other?', options: ['Same charges repel', 'Opposite charges create electrostatic attraction', 'They share a pair of electrons', 'Magnetic forces'], answer: 1, explanation: 'Opposite electrical charges produce an electrostatic force of attraction.' },
+  { q: 'Which of these best describes an ionic bond?', options: ['Electron sharing between two non-metals', 'Electrostatic attraction between oppositely charged ions', 'Delocalised electrons moving through metal layers', 'Covalent bond in a molecule'], answer: 1, explanation: 'An ionic bond is the electrostatic attraction between cations and anions.' },
+  { q: 'Magnesium forms Mg²⁺. How many electrons does it lose?', options: ['1', '2', '3', 'None'], answer: 1, explanation: 'Mg (Group 2) loses two valence electrons forming Mg²⁺.' },
+  { q: 'What does a negative superscript (e.g. Cl⁻) mean?', options: ['The ion lost electrons', 'The ion gained electrons', 'The nucleus gained protons', 'The atom is neutral'], answer: 1, explanation: 'A negative charge indicates the species has gained electron(s).' },
+  { q: 'In solid ionic compounds, ions are arranged in a:', options: ['Random pattern', 'Giant repeating lattice', 'Single molecule', 'Metallic layer'], answer: 1, explanation: 'Ionic solids form giant 3D lattices of alternating ions.' },
+  { q: 'What holds the lattice together?', options: ['Weak dispersion forces', 'Electrostatic attractions in all directions', 'Hydrogen bonds only', 'Covalent bonds'], answer: 1, explanation: 'Ions attract in all directions creating strong electrostatic lattice forces.' },
+  { q: 'Which property is typical of ionic compounds?', options: ['Low melting point', 'Conduct electricity as solids always', 'High melting point', 'Soft and malleable'], answer: 2, explanation: 'Strong ionic bonds require high energy to break giving high melting points.' },
+  { q: 'Molten or dissolved ionic compounds conduct because:', options: ['Ions are fixed in place', 'Electrons become delocalised', 'Ions are free to move and carry charge', 'Protons migrate'], answer: 2, explanation: 'When molten or in solution ions can move, allowing current flow.' },
+  { q: 'Sodium achieves a full outer shell by:', options: ['Gaining 7 electrons', 'Sharing 1 electron', 'Losing 1 electron', 'Splitting into two atoms'], answer: 2, explanation: 'Na loses its single valence electron revealing a full shell beneath.' },
+  { q: 'The formula MgCl₂ reflects:', options: ['Two magnesium atoms and one chlorine', 'One magnesium bonded to two chlorides', 'Magnesium shares two pairs of electrons with chlorine', 'A triple covalent bond'], answer: 1, explanation: 'Mg²⁺ requires two Cl⁻ to balance charge producing MgCl₂.' }
+];
+
+const quizState = { index: 0, answered: false, score: 0 };
+
+function initQuiz(){
+  const section = $('#quizSection');
+  if(!section) return;
+  $('#quizPrev').addEventListener('click', ()=> navigateQuiz(-1));
+  $('#quizNext').addEventListener('click', ()=> navigateQuiz(1));
+  renderQuizQuestion();
+  updateQuizProgress();
+}
+
+function renderQuizQuestion(){
+  const qObj = quizData[quizState.index];
+  $('#quizQuestion').textContent = qObj.q;
+  const opts = $('#quizOptions');
+  opts.innerHTML='';
+  quizState.answered = false;
+  $('#quizFeedback').textContent='';
+  $('#quizFeedback').className='quiz-feedback';
+  qObj.options.forEach((text, i)=>{
+    const btn = document.createElement('button');
+    btn.type='button';
+    btn.className='quiz-option';
+    btn.textContent = text;
+    btn.addEventListener('click', ()=> selectQuizOption(i));
+    opts.appendChild(btn);
+  });
+  // nav button states
+  $('#quizPrev').disabled = quizState.index === 0;
+  $('#quizNext').disabled = true;
+}
+
+function selectQuizOption(i){
+  if(quizState.answered) return;
+  quizState.answered = true;
+  const qObj = quizData[quizState.index];
+  const optionButtons = $$('.quiz-option', $('#quizOptions'));
+  optionButtons.forEach((b, idx)=>{
+    b.disabled = true;
+    if(idx === qObj.answer) b.classList.add('correct');
+    if(idx === i && idx !== qObj.answer) b.classList.add('incorrect');
+  });
+  if(i === qObj.answer){
+    quizState.score++;
+    $('#quizFeedback').textContent = 'Correct! ' + qObj.explanation;
+    $('#quizFeedback').classList.add('good');
+  } else {
+    $('#quizFeedback').textContent = 'Not quite. ' + qObj.explanation;
+    $('#quizFeedback').classList.add('bad');
+  }
+  // enable next
+  $('#quizNext').disabled = false;
+  updateQuizProgress();
+  // if last question, change next btn text
+  if(quizState.index === quizData.length -1){
+    $('#quizNext').textContent = 'Finish';
+  }else{
+    $('#quizNext').textContent = 'Next';
+  }
+}
+
+function navigateQuiz(dir){
+  if(dir === 1 && quizState.index === quizData.length -1){
+    showQuizSummary();
+    return;
+  }
+  quizState.index = Math.min(Math.max(quizState.index + dir, 0), quizData.length -1);
+  renderQuizQuestion();
+  updateQuizProgress();
+}
+
+function updateQuizProgress(){
+  $('#quizProgress').textContent = `Question ${quizState.index +1} of ${quizData.length} · Score: ${quizState.score}`;
+}
+
+function showQuizSummary(){
+  const summary = $('#quizSummary');
+  summary.hidden = false;
+  const percent = Math.round((quizState.score / quizData.length)*100);
+  summary.innerHTML = `<h3>Quiz Complete</h3><p>You answered <strong>${quizState.score}</strong> of <strong>${quizData.length}</strong> correctly (${percent}%).</p><p>Great job exploring ionic bonding! You can review by using Previous or reset the page to try again.</p>`;
+  // hide core interaction
+  $('.quiz-core').style.display='none';
 }
